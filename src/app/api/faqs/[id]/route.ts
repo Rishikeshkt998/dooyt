@@ -2,7 +2,7 @@
 // DELETE /api/faqs/[id] — protected (delete)
 
 import { NextRequest, NextResponse } from "next/server";
-import { updateFaq, deleteFaq, getFaqById } from "@/lib/store";
+import { updateFaq, deleteFaq, getFaqById } from "@/services/faqService";
 import { requireAuth } from "@/lib/auth";
 
 export async function PUT(

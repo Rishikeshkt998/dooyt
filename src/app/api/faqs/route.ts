@@ -2,7 +2,7 @@
 // POST /api/faqs — protected (create)
 
 import { NextRequest, NextResponse } from "next/server";
-import { getFaqs, createFaq } from "@/lib/store";
+import { getFaqs, createFaq } from "@/services/faqService";
 import { requireAuth } from "@/lib/auth";
 
 export async function GET() {

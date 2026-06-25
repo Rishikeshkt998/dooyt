@@ -1,7 +1,8 @@
 // POST /api/demo-requests — public (create a lead)
 
 import { NextRequest, NextResponse } from "next/server";
-import { createDemoRequest, getPlanById } from "@/lib/store";
+import { createDemoRequest } from "@/services/demoRequestService";
+import { getPlanById } from "@/services/planService";
 import { validateDemoRequest } from "@/lib/validators";
 
 export async function POST(request: NextRequest) {

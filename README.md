@@ -1,75 +1,150 @@
-# Dooyt ERP — Full-Stack Take-Home Assessment
+# Dooyt ERP — Marketing Landing Page
 
-A frontend-focused full-stack landing page build for the **Dooyt ERP Platform**, powered by a lightweight REST API built with Next.js App Router.
-
-## Stack & Decisions
-
-- **Frontend**: Next.js 15 (App Router, Client & Server Components)
-- **Styling**: Tailwind CSS v4 (rich dark mode, modern typography, glassmorphism, responsive grids, custom animations)
-- **Backend**: Next.js Route Handlers (`/api/...`)
-- **Data & Database**: In-memory store (pre-seeded with `seed.json` on startup)
-- **Language**: TypeScript
-
-We selected **Next.js Route Handlers** for the backend API. This allows for a unified, modern JS/TS full-stack architecture, avoiding separate process management, keeping setup simple, and utilizing unified routing schemas.
+A full-stack marketing site for **Dooyt**, a customizable ERP platform. Built with **Next.js 16 (App Router)** using a unified codebase where the frontend and backend API co-exist in the same project.
 
 ---
 
-## Features Implemented
+## 🏗️ Backend Stack
 
-### Part 1 — Frontend (Next.js + Tailwind)
-- **Responsive Layout**: Designed mobile-first, scales seamlessly to tablet and desktop resolutions.
-- **Interactive Navigation**: Sticky header with backdrop blur and responsive mobile hamburger drawer.
-- **Dynamic Content Fetching**: Modules, Industries, Pricing, Testimonials, and FAQs are all fetched from the backend API.
-- **Interactive Price Toggle**: Toggling between Monthly and Annual billing recomputes prices (applying a 15% discount computed server-side) and showcases the "Save 15%" badge.
-- **FAQ Accordion**: Smoothly expands and collapses questions.
-- **Testimonial Slider**: Sliding carousel of customer quotes with manual dot pagination, rating stars, and automatic rotation.
-- **Demo Request Form**: Fully validated (Full Name + email required, valid email format), submits asynchronously with visual loading spinner and clear success/error toast alerts.
-- **Polished States**: Includes visual loading skeleton cards, error boundaries, empty states, and custom hover states.
+| Layer | Choice |
+|---|---|
+| Runtime | **Next.js 16 Route Handlers** (App Router) |
+| Language | **TypeScript** |
+| Data layer | **In-memory store** (`src/lib/store.ts`) seeded from `src/data/seed.json` |
+| Auth | API-key header (`x-api-key`) validated in `src/lib/auth.ts` |
+| Validation | Custom validators in `src/lib/validators.ts` |
 
-### Part 2 — Backend API Contract
-All specified API routes are built under `/api`:
-- `GET /api/modules` - supporting `?search=` and `?category=` queries
-- `GET /api/industries` - returning the pre-seeded sector data
-- `GET /api/plans` - supporting `?billing=monthly|annual` (server-side discount calculation)
-- `GET /api/testimonials` - paginated using the required envelope: `{ data: [...], page: 1, limit: 10, total: 6 }`
-- `GET /api/faqs` - returning all accordion questions
-- `POST /api/demo-requests` - validates email structure, checks if selection plan exists (returning `422` for unknown plans), and inserts request returning status `201`
-- **Protected Routes** (Requires header `X-Api-Key: dooyt-demo-key-2026`):
-  - `POST`, `PUT`, `DELETE` to `/api/{modules|plans|testimonials|faqs}/[id]`
-  - `GET /api/admin/demo-requests` (paginated list of lead submissions)
-  - `PATCH /api/admin/demo-requests/[id]` (updates lead status: `new` / `contacted` / `closed`)
+There is **no external database**. All data (modules, industries, plans, testimonials, FAQs, demo requests) lives in a singleton in-memory store that is seeded once at server start from `seed.json`. This makes the project fully self-contained with zero external dependencies.
+
+### API Endpoints
+
+| Method | Route | Auth | Description |
+|--------|-------|------|-------------|
+| `GET` | `/api/modules` | Public | List all ERP modules |
+| `GET` | `/api/industries` | Public | List all supported industries |
+| `GET` | `/api/plans` | Public | List pricing plans (`?billing=monthly\|annual`) |
+| `GET` | `/api/testimonials` | Public | List testimonials |
+| `GET` | `/api/faqs` | Public | List FAQs |
+| `POST` | `/api/demo-requests` | Public | Submit a demo request |
+| `GET` | `/api/admin/demo-requests` | 🔒 API key | List demo requests (paginated) |
+| `PATCH` | `/api/admin/demo-requests/:id` | 🔒 API key | Update demo request status |
+
+**Status codes:** `201` Created · `200` OK · `401` Bad/missing key · `404` Unknown ID · `422`/`400` Validation error
+
+**Admin API key** — set via `ADMIN_API_KEY` environment variable (see [Environment Setup](#-environment-setup) below).
 
 ---
 
-## How to Run locally
+## 🚀 Running the Project
 
 ### Prerequisites
-- Node.js (v18.x or later recommended)
-- npm (installed with Node)
 
-### Installation
-1. Navigate to the project directory:
-   ```bash
-   cd dooyt
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+- **Node.js** `>= 18`
+- **npm** (comes with Node)
 
-### Running Development Server
-Start the unified Next.js frontend & backend dev server:
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Start the development server
+
 ```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser to view the landing page.
 
-### Production Build
-Verify that the build compiles correctly without TypeScript or lint issues:
-```bash
-npm run build
+This starts **both** the frontend and the backend API simultaneously on:
+
 ```
-Start the production server:
+http://localhost:3000
+```
+
+> The frontend and backend are part of the same Next.js process — there is no separate server to start.
+
+### Other commands
+
 ```bash
-npm run start
+# Build for production
+npm run build
+
+# Start production server (after build)
+npm start
+
+# Run ESLint
+npm run lint
+```
+
+---
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── api/                  # ← Backend: Route Handlers
+│   │   ├── modules/
+│   │   ├── industries/
+│   │   ├── plans/
+│   │   ├── testimonials/
+│   │   ├── faqs/
+│   │   ├── demo-requests/
+│   │   └── admin/
+│   ├── layout.tsx
+│   └── page.tsx
+├── components/               # ← Frontend: React components
+│   ├── forms/
+│   ├── layout/
+│   └── sections/
+├── data/
+│   └── seed.json             # ← Seed data for the in-memory store
+├── hooks/
+│   └── useFetch.ts
+├── lib/
+│   ├── store.ts              # ← In-memory data store
+│   ├── auth.ts               # ← API key validation
+│   ├── validators.ts
+│   └── constants.ts
+├── types/                    # ← Shared TypeScript types
+└── utils/                    # ← Shared utilities & UI config
+```
+
+---
+
+## 🔑 Environment Setup
+
+Copy the example file and fill in your values — **never commit real secrets**:
+
+```bash
+cp .env.example .env.local
+```
+
+`.env.example` (safe to commit, no real values):
+
+```env
+# Admin API key for protected routes (choose any strong random string)
+ADMIN_API_KEY=your-secret-key-here
+```
+
+The server reads `process.env.ADMIN_API_KEY` in `src/lib/auth.ts`. Set a strong random value before deploying.
+
+---
+
+## 🧪 Testing the API (curl examples)
+
+```bash
+# List modules
+curl http://localhost:3000/api/modules
+
+# List plans (annual billing)
+curl "http://localhost:3000/api/plans?billing=annual"
+
+# Submit a demo request
+curl -X POST http://localhost:3000/api/demo-requests \
+  -H "Content-Type: application/json" \
+  -d '{"fullName":"Jane Doe","email":"jane@example.com"}'
+
+# List demo requests (admin, protected)
+curl http://localhost:3000/api/admin/demo-requests \
+  -H "x-api-key: $ADMIN_API_KEY"
 ```

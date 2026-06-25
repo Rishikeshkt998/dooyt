@@ -2,7 +2,7 @@
 // DELETE /api/plans/[id] — protected (delete)
 
 import { NextRequest, NextResponse } from "next/server";
-import { updatePlan, deletePlan, getPlanById } from "@/lib/store";
+import { updatePlan, deletePlan, getPlanById } from "@/services/planService";
 import { requireAuth } from "@/lib/auth";
 
 export async function PUT(

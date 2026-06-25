@@ -1,22 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useFetch } from "@/hooks/useFetch";
 import type { Module } from "@/types";
+import { moduleImages } from "@/lib/constants";
 
 export default function Modules() {
   const { data, loading, error, refetch } = useFetch<{ data: Module[] }>("/api/modules");
   const [activeTabId, setActiveTabId] = useState<string>("");
 
-  const modules = data?.data || [];
+  const modules = useMemo(() => data?.data || [], [data]);
 
   useEffect(() => {
     if (modules.length > 0 && !activeTabId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTabId(modules[0].id);
     }
   }, [modules, activeTabId]);
 
-  const activeModule = modules.find((m) => m.id === activeTabId) || null;
+  const activeModule = useMemo(() => modules.find((m) => m.id === activeTabId) || null, [modules, activeTabId]);
 
   return (
     <section id="modules" className="py-10 bg-white relative px-4 sm:px-6">
@@ -84,26 +86,26 @@ export default function Modules() {
 
             {/* Active Module Panel */}
             {activeModule && (
-              <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center bg-[#FFF8F2] p-8 sm:p-12 lg:p-16 rounded-[2.5rem]">
+              <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center bg-[#FFF8F2] p-6 sm:p-10 lg:p-12 rounded-[2rem] border border-[#FFF0E0] overflow-hidden">
                 
                 {/* Visual Mock Side */}
-                <div className="lg:col-span-7 w-full flex justify-center">
-                  <div className="w-full rounded-2xl bg-white shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden relative">
+                <div className="lg:col-span-7 w-full flex justify-center lg:-mb-12 self-end">
+                  <div className="w-full rounded-t-[1.5rem] rounded-b-none lg:rounded-l-[1.5rem] lg:rounded-r-none overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.06)] border border-slate-100/30">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img 
-                      src={`/images/module-${activeModule.id}.png`} 
+                      src={moduleImages[activeModule.id] || `/images/module-${activeModule.id}.png`} 
                       alt={`${activeModule.name} Dashboard Mockup`} 
-                      className="w-full h-auto object-cover"
+                      className="w-full h-auto object-cover block"
                     />
                   </div>
                 </div>
 
                 {/* Description Side */}
                 <div className="lg:col-span-5 space-y-4 text-left">
-                  <h3 className="text-2xl sm:text-3xl font-bold text-[#1A1A1A] mb-6">
+                  <h3 className="text-3xl sm:text-[2.25rem] font-bold text-[#1A1A1A] tracking-tight mb-4 leading-tight">
                     {activeModule.name}
                   </h3>
-                  <p className="text-slate-500 text-sm sm:text-base leading-relaxed">
+                  <p className="text-[#555555] text-[15px] sm:text-base leading-[1.65]">
                     {activeModule.description}
                   </p>
                 </div>

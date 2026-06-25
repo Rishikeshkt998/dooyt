@@ -23,13 +23,53 @@ export default function DemoRequestForm() {
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
+  const [isOpen, setIsOpen] = useState(false);
+
   // Sync planId with URL query params (e.g. ?plan=plan-professional)
   useEffect(() => {
     const urlPlan = searchParams.get("plan");
     if (urlPlan && plansData?.data?.some((p) => p.id === urlPlan)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData((prev) => ({ ...prev, planId: urlPlan }));
     }
   }, [searchParams, plansData]);
+
+  // Listen to hash change to open/close modal
+  useEffect(() => {
+    const checkHash = () => {
+      if (window.location.hash === "#demo") {
+        setIsOpen(true);
+      } else {
+        setIsOpen(false);
+      }
+    };
+    checkHash();
+    window.addEventListener("hashchange", checkHash);
+    return () => window.removeEventListener("hashchange", checkHash);
+  }, []);
+
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  const closeModal = () => {
+    setIsOpen(false);
+    if (window.location.hash === "#demo") {
+      window.history.pushState(
+        null,
+        "",
+        window.location.pathname + window.location.search
+      );
+    }
+  };
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -111,40 +151,57 @@ export default function DemoRequestForm() {
   };
 
   return (
-    <section id="demo" className="py-24 bg-[#FCF9F6] relative overflow-hidden px-4 sm:px-6">
-      <div className="relative max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+    <>
+      {/* Modal Dialog — opened by any href="#demo" or window.location.hash="demo" */}
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm p-4 overflow-y-auto">
+          {/* Modal Overlay Close */}
+          <div className="absolute inset-0" onClick={closeModal} />
           
-          {/* Info Side */}
-          <div className="lg:col-span-5 space-y-6">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-[#FFF2ED] border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider">
-              Request a Demo
-            </span>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#1A1A1A] leading-tight">
-              See Dooyt in <span className="text-primary">Action</span>
-            </h2>
-            <p className="text-slate-500 text-sm sm:text-base leading-relaxed font-semibold">
-              Fill out the form to schedule a personalized walkthrough. Our ERP experts will guide you through relevant modules and answer any integration questions.
-            </p>
-            <div className="space-y-4 pt-6 border-t border-slate-250/20">
-              {[
-                "Personalized onboarding roadmap",
-                "Detailed evaluation checklist",
-                "Full trial account credentials",
-              ].map((item) => (
-                <div key={item} className="flex items-center gap-3 text-slate-700">
-                  <span className="w-5 h-5 rounded-full bg-[#FFF2ED] border border-primary/20 flex items-center justify-center text-primary font-bold text-xs shrink-0">
-                    ✓
-                  </span>
-                  <span className="text-xs sm:text-sm font-semibold">{item}</span>
+          {/* Modal Container Card */}
+          <div className="relative bg-white w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] animate-in fade-in zoom-in-95 duration-200 z-10">
+            
+            {/* Close Button */}
+            <button
+              onClick={closeModal}
+              className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-colors"
+              aria-label="Close modal"
+            >
+              ✕
+            </button>
+            
+            {/* Left Column - Info Panel (Desktop Only) */}
+            <div className="hidden md:flex md:w-[40%] bg-[#FCF9F6] p-8 flex-col justify-between border-r border-slate-100">
+              <div className="space-y-6">
+                <span className="inline-block px-3 py-1 rounded-full bg-[#FFF2ED] border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-wider">
+                  Dooyt ERP
+                </span>
+                <h3 className="text-2xl font-bold text-[#1A1A1A] leading-tight">
+                  Schedule Your <span className="text-primary">Demo</span>
+                </h3>
+                <p className="text-slate-500 text-xs leading-relaxed">
+                  Fill out this quick form and one of our experts will prepare a custom demonstration tailored for your business needs.
+                </p>
+                
+                <div className="space-y-3 pt-6 border-t border-slate-250/20">
+                  {[
+                    "Personalized onboarding roadmap",
+                    "Detailed evaluation checklist",
+                    "Full trial account credentials",
+                  ].map((item) => (
+                    <div key={item} className="flex items-center gap-2.5 text-slate-700">
+                      <span className="w-4 h-4 rounded-full bg-[#FFF2ED] border border-primary/20 flex items-center justify-center text-primary font-bold text-[10px] shrink-0">
+                        ✓
+                      </span>
+                      <span className="text-xs font-semibold">{item}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
-          </div>
-
-          {/* Form Side */}
-          <div className="lg:col-span-7">
-            <div className="p-6 sm:p-10 rounded-3xl bg-white border border-slate-100 shadow-xl shadow-slate-150/50">
+            
+            {/* Right Column - Form Panel */}
+            <div className="w-full md:w-[60%] p-6 sm:p-8 overflow-y-auto">
               
               {/* Toast Alerts */}
               {status === "success" && (
@@ -171,11 +228,11 @@ export default function DemoRequestForm() {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Full Name */}
                   <div>
-                    <label htmlFor="fullName" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    <label htmlFor="fullName" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
                       Full Name *
                     </label>
                     <input
@@ -186,18 +243,18 @@ export default function DemoRequestForm() {
                       value={formData.fullName}
                       onChange={handleChange}
                       placeholder="John Doe"
-                      className={`w-full px-4 py-3 rounded-xl bg-white border text-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all ${
+                      className={`w-full px-4 py-2.5 rounded-xl bg-white border text-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all ${
                         errors.fullName ? "border-red-500/50" : "border-slate-200 focus:border-primary"
                       }`}
                     />
                     {errors.fullName && (
-                      <p className="mt-1.5 text-xs text-red-500 font-medium">{errors.fullName}</p>
+                      <p className="mt-1 text-xs text-red-500 font-medium">{errors.fullName}</p>
                     )}
                   </div>
 
                   {/* Email */}
                   <div>
-                    <label htmlFor="email" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    <label htmlFor="email" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
                       Email Address *
                     </label>
                     <input
@@ -208,20 +265,20 @@ export default function DemoRequestForm() {
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="john@company.com"
-                      className={`w-full px-4 py-3 rounded-xl bg-white border text-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all ${
+                      className={`w-full px-4 py-2.5 rounded-xl bg-white border text-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all ${
                         errors.email ? "border-red-500/50" : "border-slate-200 focus:border-primary"
                       }`}
                     />
                     {errors.email && (
-                      <p className="mt-1.5 text-xs text-red-500 font-medium">{errors.email}</p>
+                      <p className="mt-1 text-xs text-red-500 font-medium">{errors.email}</p>
                     )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Company Name */}
                   <div>
-                    <label htmlFor="company" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    <label htmlFor="company" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
                       Company Name
                     </label>
                     <input
@@ -232,13 +289,13 @@ export default function DemoRequestForm() {
                       value={formData.company}
                       onChange={handleChange}
                       placeholder="Acme Inc."
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                     />
                   </div>
 
                   {/* Phone Number */}
                   <div>
-                    <label htmlFor="phone" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    <label htmlFor="phone" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
                       Phone Number
                     </label>
                     <input
@@ -249,14 +306,14 @@ export default function DemoRequestForm() {
                       value={formData.phone}
                       onChange={handleChange}
                       placeholder="+1 (555) 000-0000"
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                     />
                   </div>
                 </div>
 
                 {/* Plan Dropdown */}
                 <div>
-                  <label htmlFor="planId" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                  <label htmlFor="planId" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
                     Select a Plan
                   </label>
                   <div className="relative">
@@ -266,7 +323,7 @@ export default function DemoRequestForm() {
                       name="planId"
                       value={formData.planId}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none cursor-pointer"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all appearance-none cursor-pointer"
                     >
                       <option value="">Choose a plan...</option>
                       {plansData?.data?.map((plan) => (
@@ -285,18 +342,18 @@ export default function DemoRequestForm() {
 
                 {/* Message */}
                 <div>
-                  <label htmlFor="message" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                  <label htmlFor="message" className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
                     Message
                   </label>
                   <textarea
                     suppressHydrationWarning
                     id="message"
                     name="message"
-                    rows={4}
+                    rows={3}
                     value={formData.message}
                     onChange={handleChange}
                     placeholder="Tell us about your requirements..."
-                    className="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none"
                   />
                 </div>
 
@@ -305,7 +362,7 @@ export default function DemoRequestForm() {
                   suppressHydrationWarning
                   type="submit"
                   disabled={submitting}
-                  className="w-full py-4 px-6 rounded-full font-bold text-white bg-primary hover:bg-primary-hover transition-all duration-200 shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-55 disabled:cursor-not-allowed"
+                  className="w-full py-3.5 px-6 rounded-full font-bold text-white bg-primary hover:bg-primary-hover transition-all duration-200 shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-55 disabled:cursor-not-allowed"
                 >
                   {submitting ? (
                     <>
@@ -323,9 +380,8 @@ export default function DemoRequestForm() {
 
             </div>
           </div>
-
         </div>
-      </div>
-    </section>
+      )}
+    </>
   );
 }

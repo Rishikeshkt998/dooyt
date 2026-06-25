@@ -2,7 +2,7 @@
 // POST /api/testimonials — protected (create)
 
 import { NextRequest, NextResponse } from "next/server";
-import { getTestimonials, createTestimonial } from "@/lib/store";
+import { getTestimonials, createTestimonial } from "@/services/testimonialService";
 import { requireAuth } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {

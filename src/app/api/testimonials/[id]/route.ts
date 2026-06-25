@@ -6,7 +6,7 @@ import {
   updateTestimonial,
   deleteTestimonial,
   getTestimonialById,
-} from "@/lib/store";
+} from "@/services/testimonialService";
 import { requireAuth } from "@/lib/auth";
 
 export async function PUT(

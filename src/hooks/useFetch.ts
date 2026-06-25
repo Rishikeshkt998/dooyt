@@ -32,6 +32,7 @@ export function useFetch<T>(url: string): UseFetchResult<T> {
   }, [url]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
   }, [fetchData]);
 

@@ -1,7 +1,7 @@
 // PATCH /api/admin/demo-requests/[id] — protected (update status)
 
 import { NextRequest, NextResponse } from "next/server";
-import { updateDemoRequestStatus, getDemoRequestById } from "@/lib/store";
+import { updateDemoRequestStatus, getDemoRequestById } from "@/services/demoRequestService";
 import { requireAuth } from "@/lib/auth";
 import { validateStatus } from "@/lib/validators";
 

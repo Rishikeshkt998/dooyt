@@ -1,30 +1,6 @@
+import { footerColumns } from "@/lib/constants";
+
 export default function Footer() {
-  const footerColumns = [
-    {
-      title: "Quick Links",
-      links: [
-        { label: "Home", href: "#hero" },
-        { label: "About Us", href: "#features" },
-        { label: "Modules", href: "#modules" },
-      ],
-    },
-    {
-      title: "Explore",
-      links: [
-        { label: "Feature", href: "#features" },
-        { label: "Benefits", href: "#modules" },
-        { label: "Contact", href: "#demo" },
-      ],
-    },
-    {
-      title: "Quick Links",
-      links: [
-        { label: "Pricing", href: "#pricing" },
-        { label: "Privacy policy", href: "#" },
-        { label: "FAQ", href: "#faq" },
-      ],
-    },
-  ];
 
   return (
     <footer id="footer" className="bg-[#000000] text-zinc-400 pt-16 pb-0 border-t border-zinc-800 relative overflow-hidden px-4 sm:px-6">

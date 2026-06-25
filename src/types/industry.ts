@@ -4,4 +4,5 @@ export interface Industry {
   name: string;
   description: string;
   icon: string;
+  image?: string;
 }

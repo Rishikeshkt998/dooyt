@@ -2,7 +2,7 @@
 // POST /api/modules — protected (create)
 
 import { NextRequest, NextResponse } from "next/server";
-import { getModules, createModule } from "@/lib/store";
+import { getModules, createModule } from "@/services/moduleService";
 import { requireAuth } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {

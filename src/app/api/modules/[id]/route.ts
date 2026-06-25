@@ -2,7 +2,7 @@
 // DELETE /api/modules/[id] — protected (delete)
 
 import { NextRequest, NextResponse } from "next/server";
-import { updateModule, deleteModule, getModuleById } from "@/lib/store";
+import { updateModule, deleteModule, getModuleById } from "@/services/moduleService";
 import { requireAuth } from "@/lib/auth";
 
 export async function PUT(

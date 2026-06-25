@@ -1,7 +1,7 @@
 // GET /api/admin/demo-requests — protected (paginated + filterable)
 
 import { NextRequest, NextResponse } from "next/server";
-import { getDemoRequests } from "@/lib/store";
+import { getDemoRequests } from "@/services/demoRequestService";
 import { requireAuth } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
